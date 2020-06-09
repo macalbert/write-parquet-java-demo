@@ -63,10 +63,10 @@ public class App {
 
         List<GenericData.Record> recordList = new ArrayList<GenericData.Record>();
 
-        for(int i = 0; i < 100_000; i++) {
+        for(int i = 1; i <= 100_000; i++) {
             GenericData.Record record = new GenericData.Record(schema);
-            record.put("myInteger", 404+i);
-            record.put("myString", "hi world of parquet!" + i);
+            record.put("myInteger", i);
+            record.put("myString", i + "hi world of parquet!");
             record.put("myDateTime", new DateTime().plusHours(i).getMillis());
 
             recordList.add(record);
