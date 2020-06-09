@@ -66,7 +66,7 @@ public class App {
         for(int i = 1; i <= 100_000; i++) {
             GenericData.Record record = new GenericData.Record(schema);
             record.put("myInteger", i);
-            record.put("myString", i + "hi world of parquet!");
+            record.put("myString", i + " hi world of parquet!");
             record.put("myDateTime", new DateTime().plusHours(i).getMillis());
 
             recordList.add(record);
