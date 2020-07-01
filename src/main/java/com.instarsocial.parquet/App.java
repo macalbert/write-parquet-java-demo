@@ -8,6 +8,9 @@ import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetWriter;
 import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +20,20 @@ public class App {
 
     public static void main(String[] args) {
 
+        DateTime dateTime = new DateTime(2020, 6, 1, 0, 0, 0, 0, DateTimeZone.UTC);
+
+        for(int i = 0; i < 2; i++) {
+            generateParquetFileFor(dateTime.plusDays(i));
+        }
+    }
+
+    private static void generateParquetFileFor(DateTime dateTime) {
         try {
             Schema schema = parseSchema();
+            DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyyMMdd");
+            Path path = new Path("data_" + dateTime.toString(fmt) + ".parquet");
 
-            List<GenericData.Record> recordList = generateRecords(schema);
-
-            Path path = new Path("data.parquet");
+            List<GenericData.Record> recordList = generateRecords(schema, dateTime);
 
             try (ParquetWriter<GenericData.Record> writer = AvroParquetWriter.<GenericData.Record>builder(path)
                     .withSchema(schema)
@@ -54,20 +65,22 @@ public class App {
                 + " ]}";
 
         Schema.Parser parser = new Schema.Parser().setValidate(true);
-        Schema schema = parser.parse(schemaJson);
-
-        return schema;
+        return parser.parse(schemaJson);
     }
 
-    private static List<GenericData.Record> generateRecords(Schema schema) {
+    private static List<GenericData.Record> generateRecords(Schema schema, DateTime dateTime) {
 
-        List<GenericData.Record> recordList = new ArrayList<GenericData.Record>();
+        List<GenericData.Record> recordList = new ArrayList<>();
 
-        for(int i = 1; i <= 100_000; i++) {
+        long secondsOfDay = 24 * 60 * 60;
+
+        for(int i = 1; i <= secondsOfDay; i++) {
+            DateTime dateTimeTmp = dateTime.withTimeAtStartOfDay().plusSeconds(i-1);
+
             GenericData.Record record = new GenericData.Record(schema);
             record.put("myInteger", i);
             record.put("myString", i + " hi world of parquet!");
-            record.put("myDateTime", new DateTime().plusHours(i).getMillis());
+            record.put("myDateTime", dateTimeTmp.getMillis());
 
             recordList.add(record);
         }
