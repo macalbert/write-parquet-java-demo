@@ -1,2 +1,2 @@
 # WriteParquetJava
-An example of how create parquet file in Java
+An simple example of how you can create parquet file in Java
