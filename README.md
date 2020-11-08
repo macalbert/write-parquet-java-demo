@@ -6,5 +6,5 @@ A simple demo of how we can create parquet files in Java. Parquet is a columnar 
 
 Using the libraries: 
 - org.apache.avro to define schemes 
-- and org.apache.parquet.hadoop to persist data
+- org.apache.parquet.hadoop to persist data
 
