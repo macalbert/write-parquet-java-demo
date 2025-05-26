@@ -23,35 +23,37 @@ public class App {
         DateTime dateTime = new DateTime(2020, 6, 1, 0, 0, 0, 0, DateTimeZone.UTC);
 
         for(int i = 0; i < 2; i++) {
-            generateParquetFileFor(dateTime.plusDays(i));
+            try {
+                generateParquetFileFor(dateTime.plusDays(i));
+            } catch (Exception e) {
+                e.printStackTrace(System.out);
+            }
         }
     }
 
-    private static void generateParquetFileFor(DateTime dateTime) {
-        try {
-            Schema schema = parseSchema();
-            DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyyMMdd");
-            Path path = new Path("data_" + dateTime.toString(fmt) + ".parquet");
+    public static Path generateParquetFileFor(DateTime dateTime) throws Exception {
+        Schema schema = parseSchema();
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyyMMdd");
+        Path path = new Path("data_" + dateTime.toString(fmt) + ".parquet");
 
-            List<GenericData.Record> recordList = generateRecords(schema, dateTime);
+        List<GenericData.Record> recordList = generateRecords(schema, dateTime);
 
-            try (ParquetWriter<GenericData.Record> writer = AvroParquetWriter.<GenericData.Record>builder(path)
-                    .withSchema(schema)
-                    .withCompressionCodec(CompressionCodecName.SNAPPY)
-                    .withRowGroupSize(ParquetWriter.DEFAULT_BLOCK_SIZE)
-                    .withPageSize(ParquetWriter.DEFAULT_PAGE_SIZE)
-                    .withConf(new Configuration())
-                    .withValidation(false)
-                    .withDictionaryEncoding(false)
-                    .build()) {
+        try (ParquetWriter<GenericData.Record> writer = AvroParquetWriter.<GenericData.Record>builder(path)
+                .withSchema(schema)
+                .withCompressionCodec(CompressionCodecName.SNAPPY)
+                .withRowGroupSize(ParquetWriter.DEFAULT_BLOCK_SIZE)
+                .withPageSize(ParquetWriter.DEFAULT_PAGE_SIZE)
+                .withConf(new Configuration())
+                .withValidation(false)
+                .withDictionaryEncoding(false)
+                .build()) {
 
-                for (GenericData.Record record : recordList) {
-                    writer.write(record);
-                }
+            for (GenericData.Record record : recordList) {
+                writer.write(record);
             }
-        } catch (Exception ex) {
-            ex.printStackTrace(System.out);
         }
+
+        return path;
     }
 
     private static Schema parseSchema() {
